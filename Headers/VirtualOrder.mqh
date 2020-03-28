@@ -3,20 +3,20 @@ class VirtualOrder
 {
 private:
     int volume;
-    float price;
+    double price;
     ENUM_ORDER_TYPE type;
     string comment;
 
 public:
-    VirtualOrder(int volume, float price, ENUM_ORDER_TYPE type, string comment = "");
+    VirtualOrder(int volume, double price, ENUM_ORDER_TYPE type, string comment = "");
 
     int GetVolume();
-    float GetPrice();
+    double GetPrice();
     ENUM_ORDER_TYPE GetType();
     string GetComment();
 };
 
-VirtualOrder::VirtualOrder(int volume, float price, ENUM_ORDER_TYPE type,string comment)
+VirtualOrder::VirtualOrder(int volume, double price, ENUM_ORDER_TYPE type,string comment)
     : volume(volume), price(price), type(type), comment(comment)
 {}
 
@@ -25,7 +25,7 @@ int VirtualOrder::GetVolume()
     return volume;
 }
 
-float VirtualOrder::GetPrice()
+double VirtualOrder::GetPrice()
 {
     return price;
 }

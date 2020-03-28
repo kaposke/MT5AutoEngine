@@ -18,7 +18,7 @@ private:
 
     bool enabled;
 
-    void GetOrdersAtPrice(float price, VirtualOrder*& output[]);
+    void GetOrdersAtPrice(double price, VirtualOrder*& output[]);
 
     // void PlaceEntries();
     void ExecuteNeededOrders();
@@ -43,7 +43,7 @@ VirtualEngine::VirtualEngine()
 
 void VirtualEngine::OnTick()
 {
-    if (!IsBuy() && !IsSell())
+    if (!IsBuySide() IsSellSideSell())
         return;
     // PlaceEntries();
     // ExecuteNeededOrders();
@@ -51,7 +51,7 @@ void VirtualEngine::OnTick()
 
 // void VirtualEngine::PlaceEntries()
 // {
-//     if (IsBuy())
+//     if (IsBuySide())
 //     {
 //         for (int i = 0; i < tickRange; i++)
 //         {
@@ -61,7 +61,7 @@ void VirtualEngine::OnTick()
 //             ArrayPush(orders, new VirtualOrder(1, price, ORDER_TYPE_BUY, "in")); // TODO: have a base volume
 //         }
 //     }
-//     else if (IsSell())
+//     else if (IsSellSide())
 //     {
 //         for (int i = 0; i < tickRange; i++)
 //         {
@@ -75,7 +75,7 @@ void VirtualEngine::OnTick()
 
 void VirtualEngine::ExecuteNeededOrders()
 {
-    double price = IsBuy() ? symbolInfo.Ask() : symbolInfo.Bid();
+    double price = IsBuySide() ? symbolInfo.Ask() : symbolInfo.Bid();
 
     VirtualOrder* ordersAtPrice[];
     GetOrdersAtPrice(price, ordersAtPrice);
@@ -136,7 +136,7 @@ void VirtualEngine::Disable()
     enabled = false;
 }
 
-void VirtualEngine::GetOrdersAtPrice(float price, VirtualOrder*& output[])
+void VirtualEngine::GetOrdersAtPrice(double price, VirtualOrder*& output[])
 {
     for (int i = 0; i < ArraySize(orders); i++)
     {

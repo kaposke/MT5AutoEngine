@@ -8,6 +8,8 @@ public:
     static void LogWarning(string sender, string message);
     static void LogError(string message);
     static void LogError(string sender, string message);
+    static void LogTrade(string message);
+    static void LogTrade(string sender, string message);
 };
 
 void Logger::LogInfo(string message)
@@ -38,4 +40,14 @@ void Logger::LogError(string message)
 void Logger::LogError(string sender, string message)
 {
     PrintFormat("[Error] %s: %s", sender, message);
+}
+
+static void Logger::LogTrade(string message)
+{
+    PrintFormat("[Trade]: %s", message);
+}
+
+static void Logger::LogTrade(string sender, string message)
+{
+    PrintFormat("[Trade] %s: %s", sender, message);
 }

@@ -1,14 +1,23 @@
 #include <Trade\Trade.mqh>
 #include <Trade\SymbolInfo.mqh>
-#include <Trade\PositionInfo.mqh>
+#include "PositionInfo.mqh"
 #include "Logger.mqh"
 
 CTrade trade;
 CSymbolInfo symbolInfo;
-CPositionInfo positionInfo;
+PositionInfo positionInfo;
 
 // class VirtualEngine;
 // VirtualEngine* virtualEngine;
 
 class ComponentSystem;
 ComponentSystem* componentSystem;
+
+class MovementSizeComponent;
+MovementSizeComponent* movementSizeComponent;
+
+class ExtremityTraderComponent;
+ExtremityTraderComponent* extremityTraderComponent;
+
+class MarketTrendComponent;
+MarketTrendComponent* marketTrendComponent;

@@ -1,65 +1,72 @@
-// #include "Globals.mqh"
+class PositionInfo
+{
+private:
+    int volume;
+    double profit;
+    double averageProfit;
 
-// class PositionInfo
-// {
-// private:
-//     double openVolume;
-//     double openProfit;
-//     double averageOpenProfit;
+public:
+    void Update();
 
-//     // double closedVolume;
-//     // double totalClosedProfit;
-//     // double averageClosedProfit;
+    int Volume();
+    double Profit();
+    double AverageProfit();
+    
+    bool IsBuySide();
+    bool IsSellSide();
+    bool HasSide();
+};
 
-//     // double totalVolume;
-//     // double totalAverageProfit;
-//     // double totalProfit;
+void PositionInfo::Update()
+{
+    volume = 0;
+    profit = 0;
+    averageProfit = 0;
 
-//     datetime tradeStartTime;
+    PositionSelect(_Symbol);
+    for (int i = 0; i < PositionsTotal(); i++)
+    {
+        PositionGetSymbol(i);
 
-// public:
-//     PositionInfo();
+        ENUM_POSITION_TYPE type = PositionGetInteger(POSITION_TYPE);
+        if (type == POSITION_TYPE_BUY)
+            volume += PositionGetDouble(POSITION_VOLUME);
+        else if (type == POSITION_TYPE_SELL)
+            volume -= PositionGetDouble(POSITION_VOLUME);
+        
+        profit += PositionGetDouble(POSITION_PROFIT);
+    }
 
-//     void update();
+    if (volume != 0)
+        averageProfit = profit / fabs(volume);
+}
 
-//     double GetOpenVolume();
-//     double GetOpenProfit();
-//     double GetAverageOpenProfit();
-// };
+int PositionInfo::Volume()
+{
+    return fabs(volume);
+}
 
-// PositionInfo::PositionInfo()
-// {
-//     openVolume = 0.0;
-//     openProfit = 0.0;
-//     averageOpenProfit = 0.0;
+double PositionInfo::Profit()
+{
+    return profit;
+}
 
-//     // closedVolume = 0.0;
-//     // totalClosedProfit = 0.0;
-//     // averageClosedProfit = 0.0;
+double PositionInfo::AverageProfit()
+{
+    return averageProfit;
+}
 
-//     // totalVolume = 0.0;
-//     // totalAverageProfit = 0.0;
-//     // totalProfit = 0.0;
-// }
+bool PositionInfo::IsBuySide()
+{
+    return volume > 0;
+}
 
-// void PositionInfo::update()
-// {
-//     openVolume = positionInfo.Volume();
-//     openProfit = positionInfo.Profit();
-//     averageOpenProfit = openProfit / openVolume;
-// }
+bool PositionInfo::IsSellSide()
+{
+    return volume < 0;
+}
 
-// double PositionInfo::GetOpenVolume()
-// {
-//     return openVolume;
-// }
-
-// double PositionInfo::GetOpenProfit()
-// {
-//     return openProfit;
-// }
-
-// double PositionInfo::GetAverageOpenProfit()
-// {
-//     return averageOpenProfit;
-// }
+bool PositionInfo::HasSide()
+{
+    return volume != 0;
+}

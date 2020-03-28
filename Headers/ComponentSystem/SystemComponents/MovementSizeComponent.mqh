@@ -18,6 +18,11 @@ private:
     bool topSaved;
     bool botSaved;
 
+    double top;
+    double bot;
+
+    bool savedFirstTime;
+
     void RecordMovement();
 
 public:
@@ -27,13 +32,19 @@ public:
     void OnTick();
     string GetInfo() const;
     void DrawObjects() const;
+
+    double GetTop() const;
+    double GetBot() const;
+
+    bool HasDefinedExtremities();
+    bool IsPriceBetweenExtremities();
 };
 
 MovementSizeComponent::MovementSizeComponent()
 {
     movementSizePool = new ValuePool<double>(20);
 
-    maxTickReturn = 3;
+    maxTickReturn = 5;
 
     currentTop = -DBL_MAX;
     currentBot = DBL_MAX;
@@ -41,6 +52,10 @@ MovementSizeComponent::MovementSizeComponent()
     lastBot = 0;
     topSaved = false;
     botSaved = false;
+    savedFirstTime = false;
+
+    top = 0;
+    bot = 0;
 }
 
 MovementSizeComponent::~MovementSizeComponent()
@@ -57,27 +72,31 @@ void MovementSizeComponent::OnTick()
     if (price < currentBot)
         currentBot = price;
 
-    if (price <= currentTop - maxTickReturn * symbolInfo.TickSize())
+    if (price <= currentTop - maxTickReturn * symbolInfo.TickSize() && (!topSaved || !savedFirstTime))
     {
+        savedFirstTime = true;
         lastTop = currentTop;
-        currentTop = price;
+        currentTop = -DBL_MAX;
         topSaved = true;
+        // Logger::LogInfo(StringFormat("Creating Top at %.2f", lastTop));
         if (botSaved)
         {
-            RecordMovement();
             botSaved = false;
+            RecordMovement();
         }
     }
 
-    if (price >= currentBot + maxTickReturn * symbolInfo.TickSize())
+    if (price >= currentBot + maxTickReturn * symbolInfo.TickSize() && (!botSaved || !savedFirstTime))
     {
+        savedFirstTime = true;
         lastBot = currentBot;
-        currentBot = price;
+        currentBot = DBL_MAX;
         botSaved = true;
+        // Logger::LogInfo(StringFormat("Creating Bot at %.2f", lastBot));
         if (topSaved)
         {
-            RecordMovement();
             topSaved = false;
+            RecordMovement();
         }
     }
 }
@@ -85,28 +104,65 @@ void MovementSizeComponent::OnTick()
 void MovementSizeComponent::RecordMovement()
 {
     double size = lastTop - lastBot;
-    movementSizePool += size;
+    movementSizePool.AddValue(size);
+    
+    double average = movementSizePool.GetAverage();
 
-    Logger::LogInfo(StringFormat("Recorded Movement. Top: %2.f | Bot: %.2f | Size: %.2f", lastTop, lastBot, size));
+    // Logger::LogInfo(StringFormat("Recorded Movement. Top: %2.f | Bot: %.2f | Size: %.2f", lastTop, lastBot, size));
+    // Logger::LogInfo(StringFormat("LastTop: %.2f | LastBot: %.2f", lastTop, lastBot));
+    Logger::LogInfo(StringFormat("New Average: %.2f", movementSizePool.GetAverage()));
+    
+    if (topSaved)
+    {
+        top = lastTop;
+        bot = top - movementSizePool.GetAverage();
+    }
+    else if (botSaved)
+    {
+        bot = lastBot;
+        top = bot + movementSizePool.GetAverage();
+    }
 }
 
 string MovementSizeComponent::GetInfo() const
 {
     string output = "";
-    
-    // output += StringFormat("CurrentTop: %.2f\n", currentTop);
-    // output += StringFormat("CurrentBot: %.2f\n", currentBot);
-    output += StringFormat("LastTop: %.2f\n", lastTop);
-    output += StringFormat("LastBot: %.2f\n", lastBot);
-    // output += StringFormat("Size Average: %.4f);
+
+    output += StringFormat("Top: %.2f\n", top);
+    output += StringFormat("Bot: %.2f\n", bot);
+    output += StringFormat("Movements: %d\n", movementSizePool.GetCurrentSize());
+    output += StringFormat("Average: %.2f\n", movementSizePool.GetAverage());
 
     return output;
 }
 
 void MovementSizeComponent::DrawObjects() const
 {
-    HLineCreate(0, "LastTop", 0, lastTop, clrDarkGreen);
-    HLineCreate(0, "LastBot", 0, lastBot, clrCrimson);
-    // HLineCreate(0, "CurrentTop", 0, currentTop, clrDarkGreen);
-    // HLineCreate(0, "CurrentBot", 0, currentBot, clrCrimson);
+    // TextCreate(0, "LastTop", 0, TimeCurrent(), lastTop, "- LastTop -", "Arial", 8, clrDarkOliveGreen, 0.0, ANCHOR_RIGHT);
+    // TextCreate(0, "LastBot", 0, TimeCurrent(), lastBot, "- LastBot -", "Arial", 8, clrFireBrick, 0.0, ANCHOR_RIGHT);
+
+    TextCreate(0, "Top", 0, TimeCurrent(), top, "- Top -", "Arial", 10, clrDarkOliveGreen, 0.0, ANCHOR_LEFT);
+    TextCreate(0, "Bot", 0, TimeCurrent(), bot, "- Bot -", "Arial", 10, clrFireBrick, 0.0, ANCHOR_LEFT);
+}
+
+double MovementSizeComponent::GetTop() const
+{
+    return top;
+}
+
+double MovementSizeComponent::GetBot() const
+{
+    return bot;
+}
+
+bool MovementSizeComponent::HasDefinedExtremities()
+{
+    return movementSizePool.GetCurrentSize() > 1;
+}
+
+
+bool MovementSizeComponent::IsPriceBetweenExtremities()
+{
+    double price = symbolInfo.Last();
+    return price < top && price > bot;
 }

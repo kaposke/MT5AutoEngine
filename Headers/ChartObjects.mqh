@@ -11,46 +11,37 @@ bool HLineCreate(const long chart_ID = 0,                   // chart's ID
                  const long z_order = 0)                    // priority for mouse click
 {
     HLineDelete(0, name);
+
     //--- if the price is not set, set it at the current Bid price level
     if (!price)
         price = SymbolInfoDouble(Symbol(), SYMBOL_BID);
+
     //--- reset the error value
     ResetLastError();
-    //--- create a horizontal line
+
     if (!ObjectCreate(chart_ID, name, OBJ_HLINE, sub_window, 0, price))
     {
-        Print(__FUNCTION__,
-              ": failed to create a horizontal line! Error code = ", GetLastError());
+        Print(__FUNCTION__, ": failed to create a horizontal line! Error code = ", GetLastError());
         return (false);
     }
-    //--- set line color
+
     ObjectSetInteger(chart_ID, name, OBJPROP_COLOR, clr);
-    //--- set line display style
     ObjectSetInteger(chart_ID, name, OBJPROP_STYLE, style);
-    //--- set line width
     ObjectSetInteger(chart_ID, name, OBJPROP_WIDTH, width);
-    //--- display in the foreground (false) or background (true)
     ObjectSetInteger(chart_ID, name, OBJPROP_BACK, back);
-    //--- enable (true) or disable (false) the mode of moving the line by mouse
-    //--- when creating a graphical object using ObjectCreate function, the object cannot be
-    //--- highlighted and moved by default. Inside this method, selection parameter
-    //--- is true by default making it possible to highlight and move the object
     ObjectSetInteger(chart_ID, name, OBJPROP_SELECTABLE, selection);
     ObjectSetInteger(chart_ID, name, OBJPROP_SELECTED, selection);
-    //--- hide (true) or display (false) graphical object name in the object list
     ObjectSetInteger(chart_ID, name, OBJPROP_HIDDEN, hidden);
-    //--- set the priority for receiving the event of a mouse click in the chart
     ObjectSetInteger(chart_ID, name, OBJPROP_ZORDER, z_order);
-    //--- successful execution
+
     return (true);
 }
 
 bool HLineDelete(const long chart_ID = 0,     // chart's ID
                  const string name = "HLine") // line name
 {
-    //--- reset the error value
     ResetLastError();
-    //--- delete a horizontal line
+
     if (!ObjectDelete(chart_ID, name))
     {
         Print(__FUNCTION__,
@@ -58,4 +49,58 @@ bool HLineDelete(const long chart_ID = 0,     // chart's ID
         return (false);
     }
     return (true);
+}
+
+bool TextCreate(const long chart_ID = 0,                            // chart's ID
+                const string name = "Text",                         // object name
+                const int sub_window = 0,                           // subwindow index
+                datetime time = 0,                                  // anchor point time
+                double price = 0,                                   // anchor point price
+                const string text = "Text",                         // the text itself
+                const string font = "Arial",                        // font
+                const int font_size = 10,                           // font size
+                const color clr = clrRed,                           // color
+                const double angle = 0.0,                           // text slope
+                const ENUM_ANCHOR_POINT anchor = ANCHOR_LEFT_UPPER, // anchor type
+                const bool back = false,                            // in the background
+                const bool selection = false,                       // highlight to move
+                const bool hidden = true,                           // hidden in the object list
+                const long z_order = 0)                             // priority for mouse click
+{
+    TextDelete(chart_ID, name);
+
+    ResetLastError();
+
+    if (!ObjectCreate(chart_ID, name, OBJ_TEXT, sub_window, time, price))
+    {
+        Print(__FUNCTION__, ": failed to create \"Text\" object! Error code = ", GetLastError());
+        return false;
+    }
+
+    ObjectSetString(chart_ID, name, OBJPROP_TEXT, text);
+    ObjectSetString(chart_ID, name, OBJPROP_FONT, font);
+    ObjectSetInteger(chart_ID, name, OBJPROP_FONTSIZE, font_size);
+    ObjectSetDouble(chart_ID, name, OBJPROP_ANGLE, angle);
+    ObjectSetInteger(chart_ID, name, OBJPROP_ANCHOR, anchor);
+    ObjectSetInteger(chart_ID, name, OBJPROP_COLOR, clr);
+    ObjectSetInteger(chart_ID, name, OBJPROP_BACK, back);
+    ObjectSetInteger(chart_ID, name, OBJPROP_SELECTABLE, selection);
+    ObjectSetInteger(chart_ID, name, OBJPROP_SELECTED, selection);
+    ObjectSetInteger(chart_ID, name, OBJPROP_HIDDEN, hidden);
+    ObjectSetInteger(chart_ID, name, OBJPROP_ZORDER, z_order);
+
+    return true;
+}
+
+bool TextDelete(const long chart_ID = 0,    // chart's ID
+                const string name = "Text") // object name
+{
+    ResetLastError();
+
+    if (!ObjectDelete(chart_ID, name))
+    {
+        Print(__FUNCTION__, ": failed to delete \"Text\" object! Error code = ", GetLastError());
+        return false;
+    }
+    return true;
 }
